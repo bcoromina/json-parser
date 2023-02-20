@@ -2,6 +2,7 @@ package com.bcoromina.jsonparser
 
 
 import com.bcoromina.parsers.Parser
+import com.bcoromina.parsers.ParserCombinators._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap

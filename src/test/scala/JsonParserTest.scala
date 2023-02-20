@@ -2,7 +2,9 @@ package com.bcoromina.jsonparser.test
 
 import com.bcoromina.jsonparser.{JsonArray, JsonBoolean, JsonNull, JsonNumber, JsonObject, JsonOpenArray, JsonParser, JsonString, JsonValue}
 import com.bcoromina.parsers.Parser
+import com.bcoromina.parsers.ParserCombinators._
 import org.scalatest.funsuite.AnyFunSuite
+
 
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
