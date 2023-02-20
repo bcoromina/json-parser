@@ -1,6 +1,7 @@
-package com.agilogy.wpbtl.examples.test
+package com.bcoromina.jsonparser.test
 
-import com.agilogy.wpbtl.examples.main.{JsonArray, JsonBoolean, JsonNull, JsonNumber, JsonObject, JsonOpenArray, JsonParser, JsonString, JsonValue, Parser}
+import com.bcoromina.jsonparser.{JsonArray, JsonBoolean, JsonNull, JsonNumber, JsonObject, JsonOpenArray, JsonParser, JsonString, JsonValue}
+import com.bcoromina.parsers.Parser
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable.ListMap

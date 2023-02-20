@@ -1,9 +1,9 @@
-package com.agilogy.wpbtl.examples.main
+package com.bcoromina.jsonparser
 
 import scala.collection.immutable.ListMap
 
-sealed trait JsonValue {
-}
+sealed trait JsonValue
+
 
 case class JsonBoolean(value: Boolean) extends JsonValue
 
@@ -44,8 +44,6 @@ object JsonValue {
         case JsonOpenObject => "{"
         case JsonCloseObject => "}"
         case JsonMemberSep => ":"
-
-
       }
     }
   }
