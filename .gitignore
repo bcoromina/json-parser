@@ -2,4 +2,5 @@
 out/
 target/
 .bsp/
+*.properties
 
