@@ -1,7 +1,5 @@
 package com.bcoromina.parsers
 
-import com.bcoromina.parsers.Parser.missingTokenFailure
-
 import scala.util.{Failure, Success, Try}
 
 

@@ -99,7 +99,7 @@ object JsonParser {
       }yield{
         v :: e
       }).withTokenName("elements")
-    } tryOr  jsonValueP.map(x => List(x))
+    } tryOr jsonValueP.map(x => List(x))
   }.withTokenName("elements")
 
   lazy val arrayP: Parser[JsonValue]= {
@@ -126,9 +126,9 @@ object JsonParser {
     }).withTokenName("objectMember")
   }
 
-  lazy val objectMembers: Parser[List[(String, JsonValue)]] = {
-    {
-      {
+  lazy val objectMembers: Parser[List[(String, JsonValue)]] =
+    (
+      (
         for {
           om <- objectMember
           _ <- nextElementSepP
@@ -136,9 +136,8 @@ object JsonParser {
         } yield {
           oms:+om
         }
-      } tryOr objectMember.map(x => List(x))
-    }.withTokenName("objectMembers")
-  }
+      ) tryOr objectMember.map(x => List(x))
+    ).withTokenName("objectMembers")
 
   lazy val objectP : Parser[JsonValue] =
     (for{

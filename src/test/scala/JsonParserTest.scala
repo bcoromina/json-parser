@@ -12,8 +12,8 @@ import scala.util.{Failure, Success, Try}
 class JsonParserTest extends AnyFunSuite{
 
 
-  test("token name propagation flatmap") {
-    val p = JsonParser.nullP.flatMap(_ => JsonParser.trueP)
+  test("token name propagation andThen") {
+    val p = JsonParser.nullP.andThen(JsonParser.trueP)
     p.parseString("nullfalse") match {
       case Failure(t) =>
         assert(t.getMessage == "Missing token 'true' at position 5")
@@ -90,8 +90,8 @@ class JsonParserTest extends AnyFunSuite{
   }
 
   test("tryOr") {
-    val p1 = JsonParser.nullP.flatMap(_ => JsonParser.trueP)
-    val p2 = JsonParser.nullP.flatMap(_ => JsonParser.falseP)
+    val p1 = JsonParser.nullP.andThen(JsonParser.trueP)
+    val p2 = JsonParser.nullP.andThen(JsonParser.falseP)
 
     val p3 = p1 tryOr p2
 
@@ -104,8 +104,8 @@ class JsonParserTest extends AnyFunSuite{
   }
 
   test("token name propagation tryOr") {
-    val p1 =  JsonParser.nullP.flatMap( _ => JsonParser.trueP)
-    val p2 =  JsonParser.nullP.flatMap( _ => JsonParser.falseP)
+    val p1 =  JsonParser.nullP.andThen(JsonParser.trueP)
+    val p2 =  JsonParser.nullP.andThen(JsonParser.falseP)
 
     val p3 = p1 tryOr p2
 
