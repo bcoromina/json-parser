@@ -1,5 +1,7 @@
 package com.bcoromina.parsers
 
+import com.bcoromina.jsonparser.JsonValue
+
 import scala.util.{Failure, Success, Try}
 
 
@@ -9,7 +11,8 @@ import scala.util.{Failure, Success, Try}
 case class Parser[+A](parse: (String,Int) => Option[(Try[A], Int)], tokenName: String = "unknown"){
 
   def withTokenName(word: String): Parser[A] = Parser(parse,word)
-  def parseString(s: String): Try[A] = {
+
+  def parseString(s: String): Try[A] =
     parse(s, 0) match {
       case None =>
         Parser.missingTokenFailure(tokenName, 1)
@@ -20,33 +23,27 @@ case class Parser[+A](parse: (String,Int) => Option[(Try[A], Int)], tokenName: S
       case Some((f@Failure(_), _)) =>
         f
     }
-  }
 }
 object Parser{
-  def tokenParser[A](token: String, jsonValue: A): Parser[A] = {
+  def tokenParser[A <: JsonValue](token: String, jsonValue: A): Parser[A] =
     Parser((s, i) => {
-      if (s.startsWith(token, i)) {
+      if (s.startsWith(token, i))
         Some((Success(jsonValue), i + token.length))
-      } else {
-        None
-      }
+      else None
     },
       token
     )
-  }
 
-  def missingTokenFailure(tokenName: String, pos: Int): Failure[Nothing] = {
-    if (tokenName != "") {
+  def missingTokenFailure(tokenName: String, pos: Int): Failure[Nothing] =
+    if (tokenName != "")
       Failure(new IllegalArgumentException(s"Missing token '${tokenName}' at position ${pos}"))
-    } else {
+    else
       Failure(new Exception(s"Missing token at position $pos"))
-    }
-  }
 }
 
 object ParserCombinators{
   implicit class ParserOps[A](a: Parser[A]) {
-    def or(b: Parser[A]): Parser[A] = {
+    def or(b: Parser[A]): Parser[A] =
       Parser((s, i) => {
         a.parse(s, i) match {
           case None => b.parse(s, i)
@@ -55,9 +52,8 @@ object ParserCombinators{
       },
         s"${a.tokenName} or ${b.tokenName}"
       )
-    }
 
-    def tryOr(b: Parser[A]): Parser[A] = {
+    def tryOr(b: Parser[A]): Parser[A] =
       Parser((s, i) => {
         a.parse(s, i) match {
           case None =>
@@ -68,9 +64,8 @@ object ParserCombinators{
       },
         s"${a.tokenName} or ${b.tokenName}"
       )
-    }
 
-    def andThen[B](b: => Parser[B]): Parser[(A, B)] = {
+    def andThen[B](b: => Parser[B]): Parser[(A, B)] =
       Parser((s, i) => {
         a.parse(s, i) match {
           case None => None
@@ -88,9 +83,9 @@ object ParserCombinators{
       },
         a.tokenName
       )
-    }
 
-    def flatMap[B](f: A => Parser[B]): Parser[B] = {
+
+    def flatMap[B](f: A => Parser[B]): Parser[B] =
       Parser((s, i) => {
         a.parse(s, i) match {
           case None => None
@@ -109,10 +104,9 @@ object ParserCombinators{
       },
         a.tokenName
       )
-    }
 
 
-    def map[B](f: A => B): Parser[B] = {
+    def map[B](f: A => B): Parser[B] =
       Parser((s, i) =>
         a.parse(s, i) match {
           case None => None
@@ -121,9 +115,6 @@ object ParserCombinators{
         },
         a.tokenName
       )
-    }
 
   }
 }
-
-

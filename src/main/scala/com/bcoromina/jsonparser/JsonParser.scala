@@ -84,8 +84,10 @@ object JsonParser {
   lazy val jsonValueP: Parser[JsonValue] =
     (nullP or trueP or falseP or stringP or numberP or arrayP or objectP).withTokenName("jsonvalue")
 
+  val oneElementP = jsonValueP.map(x => List(x))
+
   val elementsP2 : Parser[List[JsonValue]] = {
-   (jsonValueP andThen nextElementSepP andThen elementsP2).map{ case ((v,_),e) => v :: e} tryOr jsonValueP.map(x => List(x))
+   (jsonValueP andThen nextElementSepP andThen elementsP2).map{ case ((v,_),e) => v :: e}  tryOr oneElementP
   }.withTokenName("elements")
 
 
@@ -102,21 +104,20 @@ object JsonParser {
     } tryOr jsonValueP.map(x => List(x))
   }.withTokenName("elements")
 
-  lazy val arrayP: Parser[JsonValue]= {
-    (for{
-        _ <- openArrayParser
-        rest <- closeArrayParser.map(_ => List.empty[JsonValue]) or {
-          (for{
-            e <- elementsP2
-            _<- closeArrayParser
-          }yield e)
-        }
-      }yield{
-        JsonArray(rest).asInstanceOf[JsonValue]
-      })
-  }
 
-  lazy val objectMember: Parser[(String, JsonValue)] ={
+  lazy val arrayP: Parser[JsonValue] =
+    for{
+        _ <- openArrayParser
+        rest <- closeArrayParser.map(_ => List.empty[JsonValue]) or (
+            for{
+              e <- elementsP2
+              _<- closeArrayParser
+            }yield e
+          )
+      }yield JsonArray(rest)
+
+
+  lazy val objectMember: Parser[(String, JsonValue)] =
     (for{
       e <- stringP.asInstanceOf[Parser[JsonString]]
       _ <- memberSepP
@@ -124,7 +125,6 @@ object JsonParser {
     }yield{
       (e.value -> v)
     }).withTokenName("objectMember")
-  }
 
   lazy val objectMembers: Parser[List[(String, JsonValue)]] =
     (
@@ -153,7 +153,6 @@ object JsonParser {
    }yield{
      JsonObject(v)
    }).withTokenName("object")
-
 
 }
 

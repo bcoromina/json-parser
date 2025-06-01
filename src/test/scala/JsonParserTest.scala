@@ -11,9 +11,36 @@ import scala.util.{Failure, Success, Try}
 
 class JsonParserTest extends AnyFunSuite{
 
+  test("parse null"){
+    assert(JsonParser.parse("null") == Success(JsonNull))
+  }
+
+  test("parse true") {
+    assert(JsonParser.parse("true") == Success(JsonBoolean(true)))
+  }
+
+  test("parse false") {
+    assert(JsonParser.parse("false") == Success(JsonBoolean(false)))
+  }
+
+  test("parse number") {
+    assert(JsonParser.parse("3") == Success(JsonNumber("3")))
+  }
+
+  test("empty string") {
+    assert(JsonParser.parse("").isFailure)
+  }
+
+  test("non empty string") {
+    assert(JsonParser.parse(""""hola"""") == Success(JsonString("hola")))
+  }
+
+  test("non empty string containing token") {
+    assert(JsonParser.parse(""""null"""") == Success(JsonString("null")))
+  }
 
   test("token name propagation andThen") {
-    val p = JsonParser.nullP.andThen(JsonParser.trueP)
+    val p = JsonParser.nullP andThen JsonParser.trueP
     p.parseString("nullfalse") match {
       case Failure(t) =>
         assert(t.getMessage == "Missing token 'true' at position 5")
@@ -22,11 +49,25 @@ class JsonParserTest extends AnyFunSuite{
   }
 
   test("token name propagation or") {
-    val p = (JsonParser.nullP or JsonParser.trueP)
+    val p = JsonParser.nullP or JsonParser.trueP
     p.parseString("hola") match {
       case Failure(t) =>
         assert(t.getMessage == "Missing token 'null or true' at position 1")
       case _ => fail()
+    }
+  }
+
+  test("tryOr") {
+    val p1 = JsonParser.nullP andThen JsonParser.trueP
+    val p2 = JsonParser.nullP andThen JsonParser.falseP
+
+    val p3 = p1 tryOr p2
+
+    p3.parseString("nullfalse") match {
+      case Success(value) =>
+        assert(true)
+      case _ =>
+        fail()
     }
   }
 
@@ -64,8 +105,6 @@ class JsonParserTest extends AnyFunSuite{
     }
   }
 
-
-
   test("array with missing closing") {
     val p = JsonParser.arrayP
     val res = p.parseString("[1,2")
@@ -77,27 +116,11 @@ class JsonParserTest extends AnyFunSuite{
     }
   }
 
-
-
   test("missing word propagation or") {
     val p =  JsonParser.nullP or JsonParser.trueP
     p.parseString("false") match {
       case Failure(t) =>
         assert(t.getMessage == "Missing token 'null or true' at position 1")
-      case _ =>
-        fail()
-    }
-  }
-
-  test("tryOr") {
-    val p1 = JsonParser.nullP.andThen(JsonParser.trueP)
-    val p2 = JsonParser.nullP.andThen(JsonParser.falseP)
-
-    val p3 = p1 tryOr p2
-
-    p3.parseString("nullfalse") match {
-      case Success(value) =>
-        assert(true)
       case _ =>
         fail()
     }
@@ -117,17 +140,6 @@ class JsonParserTest extends AnyFunSuite{
     }
   }
 
-  test("parse null"){
-    assert( JsonParser.parse("null") == Success(JsonNull))
-  }
-
-  test("parse true") {
-    assert(JsonParser.parse("true") == Success(JsonBoolean(true)))
-  }
-
-  test("parse false") {
-    assert(JsonParser.parse("false") == Success(JsonBoolean(false)))
-  }
 
   test("parse array 1") {
     assert(JsonParser.parse("[true,false,null,true]") == Success(
@@ -142,21 +154,7 @@ class JsonParserTest extends AnyFunSuite{
     ))
   }
 
-  test("parse number") {
-    assert(JsonParser.parse("3") == Success(JsonNumber("3")))
-  }
 
-  test("empty string") {
-    assert(JsonParser.parse("").isFailure)
-  }
-
-  test("non empty string") {
-    assert(JsonParser.parse(""""hola"""") == Success(JsonString("hola")))
-  }
-
-  test("non empty string containing token") {
-    assert(JsonParser.parse(""""null"""") == Success(JsonString("null")))
-  }
 
 
   test("empty array"){
@@ -242,14 +240,14 @@ class JsonParserTest extends AnyFunSuite{
 
   test("array of different types") {
     assert(JsonParser.parse("""["one",null,true]""") == Success(
-      JsonArray(
-        List(
-          JsonString("one"),
-          JsonNull,
-          JsonBoolean(true),
+        JsonArray(
+          List(
+            JsonString("one"),
+            JsonNull,
+            JsonBoolean(true),
+          )
         )
       )
-    )
     )
   }
 
